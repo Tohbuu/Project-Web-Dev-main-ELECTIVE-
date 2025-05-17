@@ -48,7 +48,7 @@ public function logout(Request $request)
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string|min:3|max:10|alpha_num|unique:users',
+            'username' => 'required|string|min:3|max:50|regex:/^[\w\-\.@#$%^&*!]+$/|unique:users',
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:8|max:70',
         ]);
