@@ -1,0 +1,184 @@
+/* Page transition animations */
+.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+    pointer-events: none; /* Prevent clicks during transition */
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+/* Pizza-specific entrance animations */
+.slide-in-right {
+    animation: slideInRight 0.8s ease forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.8s ease forwards;
+}
+
+.bounce-in {
+    animation: bounceIn 0.8s ease forwards;
+}
+
+.rotate-in {
+    animation: rotateIn 0.7s ease-out forwards;
+}
+
+.zoom-in {
+    animation: zoomIn 0.8s ease forwards;
+}
+
+/* Keyframes for animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from { 
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes rotateIn {
+    from {
+        opacity: 0;
+        transform: rotate3d(0, 0, 1, -45deg);
+    }
+    to {
+        opacity: 1;
+        transform: rotate3d(0, 0, 1, 0deg);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Section-specific animations */
+.nav-animation {
+    animation-delay: 0.1s;
+}
+
+.slider-animation {
+    animation-delay: 0.3s;
+}
+
+.features-animation {
+    animation-delay: 0.5s;
+}
+
+.product-animation {
+    animation-delay: 0.7s;
+}
+
+/* Initial state for elements that will be animated */
+body.page-transition .animated-element {
+    opacity: 0;
+}
+
+/* Pizza-specific color transitions */
+.color-transition {
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Active menu item transition */
+.menuItem {
+    transition: color 0.3s ease, font-weight 0.3s ease;
+    cursor: pointer;
+}
+
+.menuItem.active {
+    color: black;
+    font-weight: 600;
+    position: relative;
+}
+
+.menuItem.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #000;
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* Slider transition */
+.sliderWrapper {
+    transition: transform 0.5s ease;
+}
+
+/* Button hover effects */
+.buyButton, .productButton {
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.buyButton:hover, .productButton:hover {
+    transform: scale(1.05);
+}
+
+.buyButton:active, .productButton:active {
+    transform: scale(0.95);
+}
+
+/* Form input focus effects */
+.formInput, .formTextarea {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.formInput:focus, .formTextarea:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
