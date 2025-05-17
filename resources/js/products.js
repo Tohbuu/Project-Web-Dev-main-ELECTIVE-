@@ -1,9 +1,3 @@
-import pepperoniPizzaImg from '/resources/images/peperonipizza.jpg';
-import cheesePizzaImg from '/resources/';
-import hawaianPizzaImg from '../images/hawaian pizza.png';
-import meatPizzaImg from '../images/meaty pizza.png';
-import cheezeyPizzaImg from '../images/overload cheese pizza.png';
-
 export default [
     {
       id: 1,
@@ -11,7 +5,7 @@ export default [
       price: 119,
       colors: [
         {
-          img: new URL('/images/peperonipizza.jpg', import.meta.url).href,
+          img: new URL('.../images/peperonipizza.jpg', import.meta.url).href,
         },
       ],
     },
@@ -21,7 +15,7 @@ export default [
       price: 149,
       colors: [
         {
-          img: new URL('../images/Cheese pizza.png', import.meta.url).href,
+          img: new URL('.../images/Cheese pizza.png', import.meta.url).href,
         },
       ],
     },
@@ -31,7 +25,7 @@ export default [
       price: 109,
       colors: [
         {
-          img: new URL('../images/hawaian pizza.png', import.meta.url).href,
+          img: new URL('.../images/hawaian pizza.png', import.meta.url).href,
         },
       ],
     },
@@ -41,7 +35,7 @@ export default [
       price: 129,
       colors: [
         {
-          img: new URL('../images/meaty pizza.png', import.meta.url).href,
+          img: new URL('.../images/meaty pizza.png', import.meta.url).href,
         },
       ],
     },
@@ -51,7 +45,7 @@ export default [
       price: 99,
       colors: [
         {
-          img: new URL('../images/overload cheese pizza.png', import.meta.url).href,
+          img: new URL('.../images/overload cheese pizza.png', import.meta.url).href,
         },
       ],
     },

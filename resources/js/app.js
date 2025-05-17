@@ -14,7 +14,7 @@ const products = [
         price: "150",
         colors: [
             {
-                img: "/resources/images/peperonipizza.jpg"
+                img: "peperonipizza.jpg"
             }
         ]
     },
@@ -23,7 +23,7 @@ const products = [
         price: "150",
         colors: [
             {
-                img: "Cheese pizza.png"
+                img: "cheesepizza.jpg"
             }
         ]
     },
@@ -32,7 +32,7 @@ const products = [
         price: "150",
         colors: [
             {
-                img: "hawaian pizza.png"
+                img: "hawaiian pizza.jpg"
             }
         ]
     },
@@ -41,7 +41,7 @@ const products = [
         price: "150",
         colors: [
             {
-                img: "meaty pizza.png"
+                img: "meatpizza.jpg"
             }
         ]
     },
@@ -50,7 +50,7 @@ const products = [
         price: "150",
         colors: [
             {
-                img: "overload cheese pizza.png"
+                img: "cheezypizza.jpg"
             }
         ]
     }

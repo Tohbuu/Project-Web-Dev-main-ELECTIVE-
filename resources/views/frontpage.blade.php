@@ -17,12 +17,14 @@
                 <h1>{{ htmlspecialchars($user['username'] ?? 'Guest') }}</h1>
 
             </div>
+            <!-- Search bar -->
+            <!--
             <div class="navItem">
                 <div class="search">
                     <input id="search" type="text" class="searchInput" placeholder="Search...">
                     <label for="search"><i class='bx bx-search'></i></label>
                 </div>
-            </div>
+            </div>-->
             <div class="navItem">
                 @if(Auth::check())
                     <form action="{{ url('/logout') }}" method="POST" style="display: inline;">
