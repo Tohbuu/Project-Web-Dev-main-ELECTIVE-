@@ -192,3 +192,95 @@ form {
     box-shadow: none;
     
 }
+
+/*error messages validation*/
+.error-messages {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 85%;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    animation: slideIn 0.4s ease-out forwards;
+    border-left: 4px solid #ff3333;
+    text-align: left;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.error-text {
+    color: #d32f2f;
+    margin: 5px 0;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.4;
+}
+
+.error-text::before {
+    content: "!";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 20px;
+    height: 20px;
+    background-color: #ff3333;
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Add a close button */
+.error-messages::after {
+    content: "×";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.error-messages::after:hover {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+/* Auto-hide animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+.error-messages.hide {
+    animation: fadeOut 0.4s ease-in forwards;
+}

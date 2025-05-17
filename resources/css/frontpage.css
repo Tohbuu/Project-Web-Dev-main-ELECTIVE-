@@ -45,7 +45,7 @@ nav {
   background-color: var(--primary-color);
   color: var(--white);
   padding: 10px 40px;
-  position: sticky;
+  position:sticky;
   top: 0;
   z-index: 100;
 }
@@ -177,17 +177,35 @@ nav {
 
 .menuItem {
   margin: 0 1.25rem;
-  cursor: pointer;
   color: var(--text-light);
-  font-weight: 500;
-  padding: 0.75rem 0;
+  cursor: pointer;
   position: relative;
-  border: none;
-  background: none;
-  font-size: 1rem;
-  white-space: nowrap;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  opacity: 0.8;
+  transition: color 0.3s ease;
+}
+
+.menuItem:hover {
+  color: var(--white);
+}
+
+.menuItem.active {
+  color: var(--white);
+}
+
+.menuItem::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background-color: var(--white);
+  transition: width 0.3s ease;
+}
+
+.menuItem:hover::after,
+.menuItem.active::after {
+  width: 80%;
 }
 
 .menuItem::after {
@@ -496,7 +514,7 @@ nav {
   gap: 15px;
   margin: 15px 0;
 }
-
+/*size options*/
 .sizeOption {
   display: flex;
   align-items: center;
@@ -773,4 +791,23 @@ nav {
 
 .social-icons a:hover i {
     transform: rotate(360deg);
+}
+
+/* Phone validation styles */
+.invalid-input {
+    border: 2px solid #ff3333 !important;
+    background-color: rgba(255, 0, 0, 0.05);
+}
+
+.error-message {
+    color: #ff3333;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }

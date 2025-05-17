@@ -5,7 +5,7 @@ export default [
       price: 119,
       colors: [
         {
-          img: new URL('.../images/peperonipizza.jpg', import.meta.url).href,
+          img: new URL('../images/peperonipizza.jpg', import.meta.url).href,
         },
       ],
     },
@@ -15,7 +15,7 @@ export default [
       price: 149,
       colors: [
         {
-          img: new URL('.../images/Cheese pizza.png', import.meta.url).href,
+          img: new URL('../images/cheesepizza.jpg', import.meta.url).href,
         },
       ],
     },
@@ -25,7 +25,7 @@ export default [
       price: 109,
       colors: [
         {
-          img: new URL('.../images/hawaian pizza.png', import.meta.url).href,
+          img: new URL('../images/hawaiian pizza.jpg', import.meta.url).href,
         },
       ],
     },
@@ -35,7 +35,7 @@ export default [
       price: 129,
       colors: [
         {
-          img: new URL('.../images/meaty pizza.png', import.meta.url).href,
+          img: new URL('../images/meatpizza.jpg', import.meta.url).href,
         },
       ],
     },
@@ -45,7 +45,7 @@ export default [
       price: 99,
       colors: [
         {
-          img: new URL('.../images/overload cheese pizza.png', import.meta.url).href,
+          img: new URL('../images/cheezypizza.jpg', import.meta.url).href,
         },
       ],
     },

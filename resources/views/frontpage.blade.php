@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Order delicious pizzas online - fresh and fast delivery">
-    <title>Pizza Shop - Fresh & Delicious Pizzas</title>
+    <title>Captain Chef - Fresh & Delicious Pizzas</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     @vite(['resources/css/frontpage.css', 'resources/css/animations.css'])
     <link rel="preconnect" href="https://unpkg.com">
@@ -92,7 +92,7 @@
                         "desc" => "Loaded with pepperoni, Italian sausage, bacon, and ground beef on our signature sauce and cheese blend." 
                     ],
                     [ 
-                        "name" => "Cheesy Pizza", 
+                        "name" => "Overload Cheesy Pizza", 
                         "price" => "₱150", 
                         "img" => "overload cheese pizza.png", 
                         "class" => "over", 
@@ -103,8 +103,7 @@
 
             @foreach ($pizzaItems as $index => $pizza)
                 <div class="sliderItem">
-                    <img src="{{ asset($pizza['img']) }}" alt="{{ $pizza['name'] }}" class="sliderImg" loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
-                    <div class="sliderBg"></div>
+   <img src="{{ asset('images/' . $pizza['img']) }}" alt="{{ $pizza['name'] }}" class="sliderImg" loading="{{ $index === 0 ? 'eager' : 'lazy' }}">                    <div class="sliderBg"></div>
                     <div class="container">
                         <h1 class="slidertitle {{ $pizza['class'] }}">{{ $pizza['name'] }}</h1>
                         <h2 class="sliderPrice">{{ $pizza['price'] }}</h2>
@@ -120,19 +119,19 @@
 
     <div class="features animated-element features-animation slide-in-left">
         <div class="feature">
-            <img class="featureIcon" src="{{ asset('bird.png') }}" alt="Early Bird Special">
+            <img class="featureIcon" src="{{ asset('images/bird.png') }}" alt="Early Bird Special">
             <span class="FeatureTitle">EARLY BIRD FAMILY PACK</span>
             <span class="FeatureDesc">Order by 5 PM and snag two large pizzas <b>IN STORE ONLY</b></span>
         </div>
 
         <div class="feature">
-            <img class="featureIcon" src="{{ asset('fast.png') }}" alt="Free Shipping">
+            <img class="featureIcon" src="{{ asset('images/fast.png') }}" alt="Free Shipping">
             <span class="FeatureTitle">FREE SHIPPING</span>
             <span class="FeatureDesc">Free delivery near to you!</span>
         </div>
 
         <div class="feature">
-            <img class="featureIcon" src="{{ asset('pizzaa.jpg') }}" alt="Fresh Pizza">
+            <img class="featureIcon" src="{{ asset('images/pizzaa.jpg') }}" alt="Fresh Pizza">
             <span class="FeatureTitle">GUARANTEED FRESH EVERYDAY!</span>
             <span class="FeatureDesc">Fresh from out of the oven</span>
         </div>
@@ -141,7 +140,7 @@
     <div class="product animated-element product-animation zoom-in" id="product">
         <form id="orderForm" class="productForm" action="{{ url('/checkout') }}" method="POST">
             @csrf
-            <img src="{{ asset('pepporoni pizza.png') }}" alt="Selected Pizza" class="productImg" id="formProductImg">
+            <img src="{{ asset('images/pepporoni pizza.png') }}" alt="Selected Pizza" class="productImg" id="formProductImg">
             <div class="productDetails">
                 <h1 class="productTitle" id="productTitleDisplay">Pepperoni Pizza</h1>
                 <h2 class="productPrice" id="productPriceDisplay">₱150</h2>
@@ -150,7 +149,6 @@
                 <input type="hidden" name="item" id="formItem" value="Pepperoni Pizza">
                 <input type="hidden" name="price" id="formPrice" value="150">
                 <input type="hidden" name="image" id="formImage" value="pepporoni pizza.png">
-
                 <div class="formGroup">
                     <label for="quantity" class="formLabel">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" min="1" value="1" class="formInput">
@@ -159,9 +157,12 @@
                 <div class="formGroup">
                     <label class="formLabel">Size:</label>
                     <div class="sizes">
-                        <label class="sizeOption"><input type="radio" name="size" value="small" checked><span>Small</span></label>
+                        <!--
+                        <label class="sizeOption"><input type="radio" name="size" value="small" checked><span>Small</span></label> -->
                         <label class="sizeOption"><input type="radio" name="size" value="medium"><span>Medium</span></label>
+                       <!--
                         <label class="sizeOption"><input type="radio" name="size" value="large"><span>Large</span></label>
+                       -->
                     </div>
                 </div>
 
@@ -172,7 +173,12 @@
 
                 <div class="formGroup">
                     <label for="phoneNumber" class="formLabel">Phone Number:</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" required class="formInput" placeholder="Enter your phone number" pattern="[0-9]{11}">
+                    <input type="tel" id="phoneNumber" name="phoneNumber" required class="formInput" 
+                           placeholder="Enter your phone number" pattern="[0-9]{11}" 
+                           data-profile-phone="{{ Auth::check() ? (Auth::user()->phone ?? '') : '' }}">
+                    <span class="error-message" id="phone-error" style="display: none;">
+                        This phone number doesn't match your profile phone number
+                    </span>
                 </div>
 
                 <button type="submit" class="productButton">Place Order</button>
@@ -209,6 +215,63 @@
         @json($pizzaItems)
     </script>
     <script type="text/plain" id="asset-path">{{ asset('') }}</script>
+
+    <!-- Add phone validation script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.getElementById('phoneNumber');
+        const phoneError = document.getElementById('phone-error');
+        const orderForm = document.getElementById('orderForm');
+        
+        // Auto-fill from profile if available
+        const profilePhone = phoneInput.getAttribute('data-profile-phone');
+        if (profilePhone) {
+            phoneInput.value = profilePhone;
+        }
+        
+        // Validate on input
+        phoneInput.addEventListener('input', function() {
+            validatePhoneNumber();
+        });
+        
+        // Validate on form submission
+        orderForm.addEventListener('submit', function(event) {
+            if (!validatePhoneNumber()) {
+                event.preventDefault();
+            }
+        });
+        
+        function validatePhoneNumber() {
+            const profilePhone = phoneInput.getAttribute('data-profile-phone');
+            
+            // If user is logged in and has a profile phone number
+            if (profilePhone) {
+                if (phoneInput.value !== profilePhone) {
+                    phoneInput.classList.add('invalid-input');
+                    phoneError.style.display = 'block';
+                    return false;
+                } else {
+                    phoneInput.classList.remove('invalid-input');
+                    phoneError.style.display = 'none';
+                    return true;
+                }
+            } else {
+                // If no profile phone, just validate the pattern
+                const phonePattern = /^\d{11}$/;
+                if (!phonePattern.test(phoneInput.value)) {
+                    phoneInput.classList.add('invalid-input');
+                    phoneError.textContent = 'Please enter a valid 11-digit phone number';
+                    phoneError.style.display = 'block';
+                    return false;
+                } else {
+                    phoneInput.classList.remove('invalid-input');
+                    phoneError.style.display = 'none';
+                    return true;
+                }
+            }
+        }
+    });
+    </script>
 
     <!-- Keep your existing script tag that loads app.js -->
     @vite(['resources/js/app.js'])

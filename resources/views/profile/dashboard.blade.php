@@ -39,7 +39,12 @@
                 </div>
                 <div class="info-item">
                     <label for="phone">Phone:</label>
-                    <input type="text" id="phone" name="phone" value="{{ $user->phone ?? '' }}">
+                    <input type="text" id="phone" name="phone" value="{{ $user->phone ?? '' }}" 
+                           placeholder="Enter 11-digit phone number" pattern="[0-9]{11}" 
+                           title="Please enter a valid 11-digit phone number">
+                    <span class="error-message" id="profile-phone-error" style="display: none;">
+                        Please enter a valid 11-digit phone number
+                    </span>
                 </div>
                 <div class="info-item">
                     <label for="address">Address:</label>
@@ -75,8 +80,9 @@
                                 </div>
                             </div>
                             <div class="order-actions">
+                                <!--
                                 <button class="edit-btn" onclick="toggleEditForm('{{ $order->id }}')">Edit Order</button>
-                            </div>
+                            </div>-->
                             <div class="edit-form" id="edit-form-{{ $order->id }}" style="display: none;">
                                 <form action="{{ route('order.update', $order->id) }}" method="POST">
                                     @csrf
@@ -95,10 +101,12 @@
                                                 <input type="radio" name="size" value="medium" {{ $order->size == 'medium' ? 'checked' : '' }}>
                                                 Medium
                                             </label>
+                                            <!--
                                             <label>
                                                 <input type="radio" name="size" value="large" {{ $order->size == 'large' ? 'checked' : '' }}>
                                                 Large
                                             </label>
+                                        -->
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -107,7 +115,13 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="phone-{{ $order->id }}">Phone Number:</label>
-                                        <input type="tel" id="phone-{{ $order->id }}" name="phone_number" value="{{ $order->phone_number }}" class="form-input">
+                                        <input type="tel" id="phone-{{ $order->id }}" name="phone_number" value="{{ $order->phone_number }}" 
+                                               class="form-input phone-input" placeholder="Enter 11-digit phone number" 
+                                               pattern="[0-9]{11}" title="Please enter a valid 11-digit phone number" 
+                                               data-profile-phone="{{ $user->phone ?? '' }}">
+                                        <span class="error-message" id="phone-error-{{ $order->id }}" style="display: none;">
+                                            Please enter a valid 11-digit phone number
+                                        </span>
                                     </div>
                                     <button type="submit" class="save-btn">Save Changes</button>
                                 </form>
@@ -126,6 +140,80 @@
             const form = document.getElementById(`edit-form-${orderId}`);
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
+
+        // Phone number validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile phone validation
+            const profilePhone = document.getElementById('phone');
+            if (profilePhone) {
+                profilePhone.addEventListener('input', function() {
+                    validatePhoneNumber(this, 'profile-phone-error');
+                });
+            }
+
+            // Order form phone validation
+            const phoneInputs = document.querySelectorAll('.phone-input');
+            phoneInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const orderId = this.id.split('-')[1];
+                    validatePhoneNumber(this, `phone-error-${orderId}`);
+                });
+
+                // Auto-fill from profile if empty
+                input.addEventListener('focus', function() {
+                    if (!this.value) {
+                        const profilePhone = this.getAttribute('data-profile-phone');
+                        if (profilePhone) {
+                            this.value = profilePhone;
+                            const orderId = this.id.split('-')[1];
+                            validatePhoneNumber(this, `phone-error-${orderId}`);
+                        }
+                    }
+                });
+            });
+
+            function validatePhoneNumber(input, errorId) {
+                const errorElement = document.getElementById(errorId);
+                const phonePattern = /^\d{11}$/;
+                
+                if (!phonePattern.test(input.value) && input.value !== '') {
+                    input.classList.add('invalid-input');
+                    errorElement.style.display = 'block';
+                    return false;
+                } else {
+                    input.classList.remove('invalid-input');
+                    errorElement.style.display = 'none';
+                    return true;
+                }
+            }
+
+            // Form submission validation
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    let isValid = true;
+                    
+                    // Validate phone inputs in this form
+                    const phoneInputs = this.querySelectorAll('input[type="tel"]');
+                    phoneInputs.forEach(input => {
+                        const orderId = input.id.split('-')[1];
+                        if (!validatePhoneNumber(input, `phone-error-${orderId}`)) {
+                            isValid = false;
+                        }
+                    });
+                    
+                    // Validate profile phone if it exists in this form
+                    const profilePhone = this.querySelector('#phone');
+                    if (profilePhone && !validatePhoneNumber(profilePhone, 'profile-phone-error')) {
+                        isValid = false;
+                    }
+                    
+                    if (!isValid) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -8,9 +8,8 @@ function scrollToOrderForm() {
 
 // Function to update the order form with selected pizza details
 function updateOrderForm(index) {
-    const pizza = pizzaData[index];
+    const pizza = window.pizzaData[index];
     
-    // Check if pizza data exists
     if (!pizza) {
         console.error('Pizza data not found for index:', index);
         return;
@@ -19,11 +18,27 @@ function updateOrderForm(index) {
     // Update form display elements
     document.getElementById('productTitleDisplay').textContent = pizza.name;
     document.getElementById('productPriceDisplay').textContent = pizza.price;
-    document.getElementById('formProductImg').src = pizza.imgPath;
+    document.getElementById('productDescDisplay').textContent = pizza.desc || '';
     
-    // Update description if available
-    if (document.getElementById('productDescDisplay')) {
-        document.getElementById('productDescDisplay').textContent = pizza.desc || '';
+    // Handle image path more robustly
+    let imgSrc;
+    if (pizza.img.includes('/')) {
+        // If the path already includes a directory
+        imgSrc = pizza.img;
+    } else {
+        // Otherwise, prepend the images directory
+        imgSrc = (window.assetPath || '/images/') + pizza.img;
+    }
+    
+    // Update the image
+    const imgElement = document.getElementById('formProductImg');
+    if (imgElement) {
+        imgElement.src = imgSrc;
+        
+        // Add error handler to use placeholder if image fails to load
+        imgElement.onerror = function() {
+            this.src = '/images/pizza-placeholder.png';
+        };
     }
     
     // Update hidden form inputs
@@ -241,14 +256,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Export function to set pizza data from the blade template
 window.setPizzaData = function(data, assetPath) {
-    if (!data || !Array.isArray(data)) {
-        console.error('Invalid pizza data provided:', data);
-        return;
-    }
+    window.pizzaData = data;
+    window.assetPath = assetPath;
     
-    pizzaData = data.map(pizza => ({
-        ...pizza,
-        imgPath: assetPath + pizza.img
-    }));
+    // Initialize the first pizza
+    if (data && data.length > 0) {
+        updateOrderForm(0);
+    }
 };
-
