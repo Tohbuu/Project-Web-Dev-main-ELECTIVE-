@@ -82,7 +82,7 @@
                         <div class="order-item">
                             <div class="order-header">
                                 <h3>Order #{{ $order->id }}</h3>
-                                <span class="order-date">{{ $order->created_at->format('M d, Y h:i A') }}</span>
+                                <span class="order-date">{{ $order->created_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</span>
                             </div>
                             <div class="order-details">
                                 <div class="order-image">
@@ -102,13 +102,49 @@
                                     @endif
                                 </div>
                             </div>
+                            <!--order status actions-->
                             <div class="order-actions">
                                 <a href="{{ route('order.receipt', ['id' => $order->id]) }}" class="view-receipt-btn">View Receipt</a>
                                 <button class="edit-btn" onclick="toggleEditForm('{{ $order->id }}')">Edit Order</button>
                             </div>
                             <!-- Edit form remains the same -->
                             <div class="edit-form" id="edit-form-{{ $order->id }}" style="display: none;">
-                                <!-- Form content remains unchanged -->
+                                <form action="{{ route('order.update', $order->id) }}" method="POST">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label for="quantity-{{ $order->id }}">Quantity:</label>
+                                        <input type="number" id="quantity-{{ $order->id }}" name="quantity" value="{{ $order->quantity }}" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Size:</label>
+                                        <div class="size-options">
+                                            <label>
+                                                <input type="radio" name="size" value="small" {{ $order->size == 'small' ? 'checked' : '' }}>
+                                                Small
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="size" value="medium" {{ $order->size == 'medium' ? 'checked' : '' }}>
+                                                Medium
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="special-{{ $order->id }}">Special Instructions:</label>
+                                        <textarea id="special-{{ $order->id }}" name="special_instructions">{{ $order->special_instructions }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone-{{ $order->id }}">Phone Number:</label>
+                                        <input type="tel" id="phone-{{ $order->id }}" name="phone_number" value="{{ $order->phone_number }}" 
+                                               class="form-input phone-input" placeholder="Enter 11-digit phone number" 
+                                               pattern="[0-9]{11}" title="Please enter a valid 11-digit phone number" 
+                                               data-profile-phone="{{ $user->phone ?? '' }}">
+                                        <span class="error-message" id="phone-error-{{ $order->id }}" style="display: none;">
+                                            Please enter a valid 11-digit phone number
+                                        </span>
+                                    </div>
+                                    <button type="submit" class="save-btn">Save Changes</button>
+                                    <button type="button" class="cancel-btn" onclick="toggleEditForm('{{ $order->id }}')">Cancel</button>
+                                </form>
                             </div>
                         </div>
                     @endforeach
@@ -122,7 +158,11 @@
     <script>
         function toggleEditForm(orderId) {
             const form = document.getElementById(`edit-form-${orderId}`);
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            } else {
+                console.error(`Edit form for order ${orderId} not found`);
+            }
         }
 
         // Phone number validation

@@ -48,6 +48,7 @@ Route::post('/cart/complete', [CartController::class, 'complete'])->name('cart.c
     Route::post('/order/update/{id}', [ProfileDashboardController::class, 'updateOrder'])->name('order.update');
     Route::get('/order/receipt/{id}', [App\Http\Controllers\ProfileDashboardController::class, 'showReceipt'])->name('order.receipt')->middleware('auth');
     Route::delete('/order/delete/{id}', [ProfileDashboardController::class, 'deleteOrder'])->name('order.delete')->middleware('auth');
+    Route::post('/order/{id}/update', [App\Http\Controllers\OrderController::class, 'update'])->name('order.update');
 });
 
 //test receipt route

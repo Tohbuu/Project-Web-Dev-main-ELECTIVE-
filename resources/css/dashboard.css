@@ -172,41 +172,42 @@ body {
 }
 
 .edit-btn {
-    background-color: #6c757d;
+    background-color: #FF9800;
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 8px 16px;
+    padding: 8px 15px;
     font-size: 14px;
+    cursor: pointer;
 }
 
 .edit-btn:hover {
-    background-color: #5a6268;
+    background-color: #e67e22;
 }
 
 .save-btn {
-    background-color: #28a745;
+    background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 10px 20px;
+    padding: 8px 15px;
     font-size: 16px;
     cursor: pointer;
 }
 
 .save-btn:hover {
-    background-color: #218838;
+    background-color: #45a049;
 }
 
 /* Phone validation styles */
 .invalid-input {
-    border: 2px solid #ff3333 !important;
+    border: 2px solid #f44336 !important;
     background-color: rgba(255, 0, 0, 0.05);
 }
 
 .error-message {
-    color: #ff3333;
-    font-size: 0.85rem;
+    color: #f44336;
+    font-size: 0.8rem;
     margin-top: 5px;
     display: none;
     animation: fadeIn 0.3s ease-in-out;
@@ -225,7 +226,7 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: 500;
+    font-weight: bold;
 }
 
 .form-input {
@@ -244,7 +245,7 @@ body {
 }
 
 .view-receipt-btn {
-    background-color: #4CAF50;
+    background-color: #2196F3;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -259,5 +260,44 @@ body {
 }
 
 .view-receipt-btn:hover {
-    background-color: #45a049;
+    background-color: #1e88e5;
+}
+
+.edit-form {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.form-group input[type="number"],
+.form-group input[type="tel"],
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.size-options {
+    display: flex;
+    gap: 15px;
+}
+
+.size-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: normal;
+}
+
+.cancel-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #f44336;
+    color: white;
 }
