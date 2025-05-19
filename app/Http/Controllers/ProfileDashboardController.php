@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class ProfileDashboardController extends Controller
 {
@@ -49,7 +50,7 @@ class ProfileDashboardController extends Controller
             'quantity' => 'required|integer|min:1',
             'size' => 'required|in:small,medium,large',
             'special_instructions' => 'nullable|string|max:500',
-            'phone_number' => 'nullable|string|max:20',  // Add validation for phone number
+            'phone_number' => 'nullable|string|max:20',
         ]);
         
         try {
@@ -61,12 +62,47 @@ class ProfileDashboardController extends Controller
                 'quantity' => $request->quantity,
                 'size' => $request->size,
                 'special_instructions' => $request->special_instructions,
-                'phone_number' => $request->phone_number,  // Include phone number
+                'phone_number' => $request->phone_number,
             ]);
             
             return redirect()->route('profile.dashboard')->with('success', 'Order updated successfully!');
         } catch (\Exception $e) {
             return redirect()->route('profile.dashboard')->with('error', 'Error updating order: ' . $e->getMessage());
+        }
+    }
+
+    public function showReceipt($id)
+    {
+        try {
+            // Find the order for the authenticated user
+            $order = Cart::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->where('status', 'completed')
+                ->firstOrFail();
+            
+            // Get the authenticated user
+            $user = Auth::user();
+            
+            // Return the receipt view with order and user data
+            return view('order-receipt', compact('order', 'user'));
+        } catch (\Exception $e) {
+            // If order not found or other error, redirect back with error message
+            return redirect()->route('profile.dashboard')->with('error', 'Order not found or you do not have permission to view it.');
+        }
+    }
+
+    public function deleteOrder($id)
+    {
+        try {
+            $order = Cart::where('id', $id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+                
+            $order->delete();
+            
+            return redirect()->route('profile.dashboard')->with('success', 'Order has been deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('profile.dashboard')->with('error', 'Error deleting order: ' . $e->getMessage());
         }
     }
 }

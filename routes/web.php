@@ -37,10 +37,27 @@ Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.de
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     // Keep checkout as POST for form submissions
     Route::post('/checkout', [CartController::class, 'store'])->name('cart.store');
+Route::patch('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/complete-checkout', [CartController::class, 'completeCheckout'])->name('cart.complete');
+Route::post('/cart/complete', [CartController::class, 'complete'])->name('cart.complete');
 });
 
     // Profile Dashboard Routes
     Route::get('/profile/dashboard', [ProfileDashboardController::class, 'index'])->name('profile.dashboard');
     Route::post('/profile/update', [ProfileDashboardController::class, 'updateProfile'])->name('profile.update');
     Route::post('/order/update/{id}', [ProfileDashboardController::class, 'updateOrder'])->name('order.update');
+    Route::get('/order/receipt/{id}', [App\Http\Controllers\ProfileDashboardController::class, 'showReceipt'])->name('order.receipt')->middleware('auth');
+    Route::delete('/order/delete/{id}', [ProfileDashboardController::class, 'deleteOrder'])->name('order.delete')->middleware('auth');
 });
+
+//test receipt route
+Route::get('/test-receipt/{id}', function($id) {
+    $order = App\Models\Cart::find($id);
+    $user = Auth::user();
+    
+    if (!$order) {
+        return "Order not found for ID: " . $id;
+    }
+    
+    return "Order found: " . $order->item . " for user: " . $user->name;
+})->middleware('auth');

@@ -168,6 +168,7 @@ body {
     padding: 0 15px 15px;
     display: flex;
     justify-content: flex-end;
+    margin-top: 10px;
 }
 
 .edit-btn {
@@ -240,4 +241,23 @@ body {
     border-color: #4a90e2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
     outline: none;
+}
+
+.view-receipt-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin-right: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.view-receipt-btn:hover {
+    background-color: #45a049;
 }

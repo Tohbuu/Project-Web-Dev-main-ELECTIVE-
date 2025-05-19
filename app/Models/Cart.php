@@ -17,7 +17,9 @@ class Cart extends Model
         'size',
         'image',
         'special_instructions',
-        'phone_number'  // Add this field
+        'phone_number',
+        'status',
+        'order_number'
     ];
 
     public function user()
