@@ -14,8 +14,11 @@
     <nav class="shiny-pearl animated-element nav-animation slide-in-right">
         <div class="navTop">
             <div class="navItem">
-                <h1>{{ htmlspecialchars($user['username'] ?? 'Guest') }}</h1>
-
+                @if(Auth::check())
+                    <h1 class="welcome-title">Welcome, {{ htmlspecialchars(Auth::user()->name) }}!</h1>
+                @else
+                    <h1>{{ htmlspecialchars($user['username'] ?? 'Guest') }}</h1>
+                @endif
             </div>
             <!-- Search bar -->
             <!--

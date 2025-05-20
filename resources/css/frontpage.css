@@ -829,7 +829,33 @@ nav {
     animation: fadeIn 0.3s ease-in-out;
 }
 
+.welcome-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--secondary-color)
+    margin: 0;
+    padding: 0;
+    animation: fadeIn 0.5s ease-in-out;
+    display: inline-block;
+    position: relative;
+}
+
+.welcome-title::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #ff4500;
+    transition: width 0.3s ease;
+}
+
+.welcome-title:hover::after {
+    width: 100%;
+}
+
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
