@@ -92,13 +92,17 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
             
+            // Get the best available avatar URL with cache busting
+            $avatarUrl = $googleUser->avatar_original ?? $googleUser->getAvatar();
+            // Add cache busting parameter
+            $avatarUrl = $this->addCacheBustingToUrl($avatarUrl);
+            
             // Debug the Google user data
             \Log::info('Google user data:', [
                 'id' => $googleUser->id,
                 'name' => $googleUser->name,
                 'email' => $googleUser->email,
-                'avatar' => $googleUser->avatar, // This is what we need
-                'avatar_original' => $googleUser->avatar_original // Try this if avatar doesn't work
+                'avatar' => $avatarUrl,
             ]);
             
             // Check if user exists in our database
@@ -108,7 +112,7 @@ class AuthController extends Controller
                 // Update existing user with latest avatar
                 $existingUser->update([
                     'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                    'avatar' => $avatarUrl,
                 ]);
                 
                 // Log in existing user
@@ -121,13 +125,16 @@ class AuthController extends Controller
                     'email' => $googleUser->email,
                     'password' => Hash::make(Str::random(16)), // Random secure password
                     'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                    'avatar' => $avatarUrl,
                 ]);
                 
                 Auth::login($newUser);
             }
             
-            return redirect('/');
+            // Clear application caches
+            $this->clearApplicationCaches();
+            
+            return redirect('/')->with('login_success', 'Successfully logged in with Google!');
             
         } catch (\Exception $e) {
             \Log::error('Google login error: ' . $e->getMessage());
@@ -152,5 +159,27 @@ class AuthController extends Controller
         }
         
         return $username;
+    }
+
+    /**
+     * Add cache busting parameter to URL
+     */
+    private function addCacheBustingToUrl($url)
+    {
+        $separator = (parse_url($url, PHP_URL_QUERY) == null) ? '?' : '&';
+        return $url . $separator . 'cb=' . time();
+    }
+
+    /**
+     * Clear application caches
+     */
+    private function clearApplicationCaches()
+    {
+        try {
+            \Artisan::call('cache:clear');
+            \Artisan::call('view:clear');
+        } catch (\Exception $e) {
+            \Log::error('Failed to clear caches: ' . $e->getMessage());
+        }
     }
 }

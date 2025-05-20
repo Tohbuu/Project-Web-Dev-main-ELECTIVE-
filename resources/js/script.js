@@ -40,4 +40,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Handle avatar loading errors with cache busting
+    const avatars = document.querySelectorAll('.user-avatar, .profile-avatar-img');
+    avatars.forEach(avatar => {
+        // Add cache-busting parameter to Google avatar URLs
+        if (avatar.src && avatar.src.includes('googleusercontent.com')) {
+            const cacheBuster = `?cb=${new Date().getTime()}`;
+            avatar.src = avatar.src.split('?')[0] + cacheBuster;
+        }
+        
+        avatar.addEventListener('error', function() {
+            console.log('Avatar failed to load: ' + this.alt);
+            // Add cache-busting parameter to default avatar
+            const defaultAvatarUrl = '/images/default-avatar.png';
+            this.src = defaultAvatarUrl + '?v=' + new Date().getTime();
+            // Prevent infinite error loop
+            this.onerror = null;
+        });
+    });
+    
+    // Clear browser cache for specific resources (avatar images)
+    function clearImageCache() {
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                    if (cacheName.includes('image')) {
+                        caches.delete(cacheName)
+                            .then(() => console.log('Cache deleted:', cacheName))
+                            .catch(err => console.error('Error deleting cache:', err));
+                    }
+                });
+            });
+        }
+    }
+    
+    // Clear image cache when user logs in with Google
+    if (window.location.href.includes('auth/google/callback') || 
+        document.referrer.includes('auth/google')) {
+        clearImageCache();
+    }
 });

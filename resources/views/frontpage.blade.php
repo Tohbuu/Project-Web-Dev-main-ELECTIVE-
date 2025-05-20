@@ -39,7 +39,8 @@
         </a>
         <a href="{{ route('profile.dashboard') }}" class="user animated-link">
             @if(Auth::user()->avatar)
-                <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->username }}" class="user-avatar" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}'; console.log('Avatar failed to load');">
+                <img src="{{ Auth::user()->avatar }}?v={{ time() }}" alt="{{ Auth::user()->username }}" class="user-avatar" 
+                     onerror="this.src='{{ asset('images/default-avatar.png') }}?v={{ time() }}'; console.log('Avatar failed to load: ' + this.alt);">
             @else
                 <i class='bx bx-user-circle icon'></i>
             @endif

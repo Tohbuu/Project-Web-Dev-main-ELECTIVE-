@@ -137,6 +137,7 @@ nav {
     transition: transform 0.3s ease;
     display: inline-block;
     vertical-align: middle;
+    background-color: #f8f9fa; /* Light background for transparent avatars */
 }
 
 .user-avatar:hover {
@@ -175,6 +176,16 @@ nav {
 
 .logout-button:hover {
   color: var(--secondary-color);
+}
+
+.profile-avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+    background-color: #f8f9fa; /* Light background for transparent avatars */
 }
 
 /*============== NAVIGATION BOTTOM ================ */

@@ -43,7 +43,8 @@
         <div class="profile-header">
             @if(Auth::user()->avatar)
                 <div class="profile-avatar">
-                    <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->username }}" class="profile-avatar-img">
+                    <img src="{{ Auth::user()->avatar }}?v={{ time() }}" alt="{{ Auth::user()->username }}" class="profile-avatar-img"
+                         onerror="this.src='{{ asset('images/default-avatar.png') }}?v={{ time() }}'; console.log('Profile avatar failed to load');">
                 </div>
             @endif
             <h1>{{ Auth::user()->name }}</h1>
