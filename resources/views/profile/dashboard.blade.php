@@ -40,6 +40,16 @@
             </div>
         @endif
 
+        <div class="profile-header">
+            @if(Auth::user()->avatar)
+                <div class="profile-avatar">
+                    <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->username }}" class="profile-avatar-img">
+                </div>
+            @endif
+            <h1>{{ Auth::user()->name }}</h1>
+            <p>{{ Auth::user()->email }}</p>
+        </div>
+
         <div class="card">
             <h2 class="section-title">Personal Information</h2>
             <form action="{{ route('profile.update') }}" method="POST">

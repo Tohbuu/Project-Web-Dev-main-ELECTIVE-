@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
-class AuthController
+class AuthController extends Controller
 {
     public function showLogin()
     {
@@ -16,29 +17,29 @@ class AuthController
     }
 
     public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'username' => 'required|string',
-        'password' => 'required|string',
-    ]);
+    {
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        return redirect()->intended('/');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('/');
+        }
+
+        return back()->withErrors([
+            'username' => 'Invalid credentials',
+        ])->onlyInput('username');
     }
 
-    return back()->withErrors([
-        'username' => 'Invalid credentials',
-    ])->onlyInput('username');
-}
-
-public function logout(Request $request)
-{
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect('/login');
-}
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    }
 
     public function showRegister()
     {
@@ -71,4 +72,85 @@ public function logout(Request $request)
         return redirect('/');
     }
 
+    /**
+     * Redirect the user to the Google authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Obtain the user information from Google.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            
+            // Debug the Google user data
+            \Log::info('Google user data:', [
+                'id' => $googleUser->id,
+                'name' => $googleUser->name,
+                'email' => $googleUser->email,
+                'avatar' => $googleUser->avatar, // This is what we need
+                'avatar_original' => $googleUser->avatar_original // Try this if avatar doesn't work
+            ]);
+            
+            // Check if user exists in our database
+            $existingUser = User::where('email', $googleUser->email)->first();
+            
+            if ($existingUser) {
+                // Update existing user with latest avatar
+                $existingUser->update([
+                    'google_id' => $googleUser->id,
+                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                ]);
+                
+                // Log in existing user
+                Auth::login($existingUser);
+            } else {
+                // Create a new user
+                $newUser = User::create([
+                    'username' => $this->generateUniqueUsername($googleUser->name),
+                    'name' => $googleUser->name,
+                    'email' => $googleUser->email,
+                    'password' => Hash::make(Str::random(16)), // Random secure password
+                    'google_id' => $googleUser->id,
+                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                ]);
+                
+                Auth::login($newUser);
+            }
+            
+            return redirect('/');
+            
+        } catch (\Exception $e) {
+            \Log::error('Google login error: ' . $e->getMessage());
+            return redirect('/login')->with('error', 'Google login failed. Please try again.');
+        }
+    }
+    
+    /**
+     * Generate a unique username based on the Google name
+     */
+    private function generateUniqueUsername($name)
+    {
+        // Convert name to lowercase and replace spaces with underscores
+        $baseUsername = Str::slug($name, '_');
+        $username = $baseUsername;
+        $counter = 1;
+        
+        // Check if username exists, if so, append a number
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . '_' . $counter;
+            $counter++;
+        }
+        
+        return $username;
+    }
 }

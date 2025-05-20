@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register Socialite service
+        $this->app->singleton(\Laravel\Socialite\Contracts\Factory::class, function ($app) {
+            return new \Laravel\Socialite\SocialiteManager($app);
+        });
     }
 
     /**

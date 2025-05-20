@@ -22,6 +22,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register')->middleware('guest');
     Route::post('/register', [AuthController::class, 'register'])->middleware('guest');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+    Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 });
 
 // Protected Routes (require authentication)

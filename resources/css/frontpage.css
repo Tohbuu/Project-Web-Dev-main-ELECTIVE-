@@ -106,6 +106,12 @@ nav {
   gap: 30px;
 }
 
+.navItem .user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .cart, 
 .user-button {
   font-size: 1.875rem; /* 30px */
@@ -119,6 +125,22 @@ nav {
 .cart:hover,
 .user-button:hover {
   transform: scale(1.1);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
 }
 
 .user-button {

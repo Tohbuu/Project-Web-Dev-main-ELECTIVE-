@@ -48,7 +48,7 @@
                 <div class="login-options">
                     <p>or login with</p>
                     <div class="social-icons">
-                        <a href="#" aria-label="Login with Google"><i class='bx bxl-google'></i></a>
+                        <a href="{{ route('auth.google') }}" aria-label="Login with Google"><i class='bx bxl-google'></i></a>
                     </div>
                 </div>
             </form>
@@ -89,11 +89,11 @@
                 </div>
                 <button type="submit" class="button">Register</button>
                 <div class="login-options">
-                    <p>or register with</p>
-                    <div class="social-icons">
-                        <a href="#" aria-label="Register with Google"><i class='bx bxl-google'></i></a>
-                    </div>
-                </div>
+    <p>or register with</p>
+    <div class="social-icons">
+        <a href="{{ route('auth.google') }}" aria-label="Register with Google"><i class='bx bxl-google'></i></a>
+    </div>
+</div>
             </form>
         </div>
 

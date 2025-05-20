@@ -26,20 +26,30 @@
                 </div>
             </div>-->
             <div class="navItem">
-                @if(Auth::check())
-                    <form action="{{ url('/logout') }}" method="POST" style="display: inline;">
-                        @csrf
-                        <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer;" class="animated-link">Log Out</button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="animated-link">Log In</a>
-                @endif
-                <a href="{{ route('cart.index') }}" class="cart animated-link">
-                    <i class='bx bx-cart icon'></i>
-                </a>
-                <a href="{{ route('profile.dashboard') }}" class="user animated-link">
-                    <i class='bx bx-user-circle icon'></i>
-                </a>
+    @if(Auth::check())
+        <form action="{{ url('/logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer;" class="animated-link">Log Out</button>
+        </form>
+        <a href="{{ route('cart.index') }}" class="cart animated-link">
+            <i class='bx bx-cart icon'></i>
+        </a>
+        <a href="{{ route('profile.dashboard') }}" class="user animated-link">
+            @if(Auth::user()->avatar)
+                <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->username }}" class="user-avatar" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}'; console.log('Avatar failed to load');">
+            @else
+                <i class='bx bx-user-circle icon'></i>
+            @endif
+        </a>
+    @else
+        <a href="{{ route('login') }}" class="animated-link">Log In</a>
+        <a href="{{ route('cart.index') }}" class="cart animated-link">
+            <i class='bx bx-cart icon'></i>
+        </a>
+        <a href="{{ route('profile.dashboard') }}" class="user animated-link">
+            <i class='bx bx-user-circle icon'></i>
+        </a>
+    @endif
             </div>
         </div>
 
