@@ -208,19 +208,19 @@
             </div>
             <div class="footer-section">
                 <h3>Contact</h3>
-                <p>Email: info@pizzashop.com</p>
-                <p>Phone: +123 456 7890</p>
+                <p>Phone: 09932974399 </p>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/edwinnicolas.punsalan"><i class='bx bxl-facebook'></i></a>
             </div>
             <div class="footer-section">
-                <h3>Follow Us</h3>
-                <div class="social-icons">
-                    <a href="#"><i class='bx bxl-facebook'></i></a>
+               
+                
                    
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} Pizza Shop. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} CaptainChef. All rights reserved.</p>
         </div>
     </footer>
 
