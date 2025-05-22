@@ -260,7 +260,7 @@
         </div>
         
         <div class="receipt-actions no-print">
-            <a href="{{ route('profile.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="{{ route('profile.dashboard') }}" class="btn btn-secondary">Back to Profile</a>
             <button onclick="window.print()" class="btn btn-print">Print Receipt</button>
         </div>
     </div>
