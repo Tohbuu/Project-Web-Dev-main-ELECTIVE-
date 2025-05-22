@@ -110,7 +110,8 @@
             </div>
         </div>
     </div>
-
     @vite(['resources/js/script.js'])
 </body>
 </html>
+
+{{-- helopppo --}}
