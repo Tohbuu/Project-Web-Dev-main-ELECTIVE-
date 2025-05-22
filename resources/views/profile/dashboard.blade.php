@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <a href="{{ url('/') }}" class="back-button">
-            <i class='bx bx-arrow-back'></i> Back to Home
+            <i class='bx bx-arrow-back'></i> Back to Dashboard
         </a>
 
         @if(session('success'))
@@ -116,7 +116,7 @@
                             <!--order status actions-->
                             <div class="order-actions">
                                 <a href="{{ route('order.receipt', ['id' => $order->id]) }}" class="view-receipt-btn">View Receipt</a>
-                                <button class="edit-btn" onclick="toggleEditForm('{{ $order->id }}')">Edit Order</button>
+                                {{-- <button class="edit-btn" onclick="toggleEditForm('{{ $order->id }}')">Edit Order</button> --}}
                             </div>
                             <!-- Edit form remains the same -->
                             <div class="edit-form" id="edit-form-{{ $order->id }}" style="display: none;">
