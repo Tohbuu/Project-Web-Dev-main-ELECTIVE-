@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: captaincheff
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: apache2-foreground
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        fromService:
+          name: captaincheff
+          type: web
+          property: url
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: CACHE_DRIVER
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: log
+      - key: GOOGLE_CLIENT_ID
+        value: 168891516146-u93j18ts6dob37dss324vs12va46fu2u.apps.googleusercontent.com
+      - key: GOOGLE_CLIENT_SECRET
+        value: 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
+      - key: GOOGLE_REDIRECT_URI
+        fromService:
+          name: captaincheff
+          type: web
+          property: url
+        suffix: /auth/google/callback
+    disk:
+      name: sqlite-data
+      mountPath: /var/www/html/database
+      sizeGB: 1
