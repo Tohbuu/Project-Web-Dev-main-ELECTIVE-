@@ -30,9 +30,9 @@ services:
       - key: MAIL_MAILER
         value: log
       - key: GOOGLE_CLIENT_ID
-        value: 168891516146-u93j18ts6dob37dss324vs12va46fu2u.apps.googleusercontent.com
+        value: 
       - key: GOOGLE_CLIENT_SECRET
-        value: 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
+        value: 
       - key: GOOGLE_REDIRECT_URI
         fromService:
           name: captaincheff
