@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
@@ -97,9 +99,27 @@ class AuthController extends Controller
                 'id' => $googleUser->id,
                 'name' => $googleUser->name,
                 'email' => $googleUser->email,
-                'avatar' => $googleUser->avatar, // This is what we need
-                'avatar_original' => $googleUser->avatar_original // Try this if avatar doesn't work
+                'avatar' => $googleUser->avatar ?? null,
+                'avatar_original' => $googleUser->avatar_original ?? null
             ]);
+            
+            // Get the best available avatar URL
+            $avatarUrl = null;
+            if (!empty($googleUser->avatar_original)) {
+                $avatarUrl = $googleUser->avatar_original;
+            } elseif (!empty($googleUser->avatar)) {
+                $avatarUrl = $googleUser->avatar;
+            }
+            
+            // Add size parameter to Google avatar URL if it exists
+            if ($avatarUrl) {
+                // Remove any existing query parameters
+                $baseUrl = strtok($avatarUrl, '?');
+                // Add size parameter and cache busting
+                $avatarUrl = $baseUrl . '?sz=100&v=' . time();
+                
+                \Log::info('Using avatar URL: ' . $avatarUrl);
+            }
             
             // Check if user exists in our database
             $existingUser = User::where('email', $googleUser->email)->first();
@@ -108,7 +128,7 @@ class AuthController extends Controller
                 // Update existing user with latest avatar
                 $existingUser->update([
                     'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                    'avatar' => $avatarUrl,
                 ]);
                 
                 // Log in existing user
@@ -121,7 +141,7 @@ class AuthController extends Controller
                     'email' => $googleUser->email,
                     'password' => Hash::make(Str::random(16)), // Random secure password
                     'google_id' => $googleUser->id,
-                    'avatar' => $googleUser->avatar_original ?? $googleUser->avatar, // Use original if available
+                    'avatar' => $avatarUrl,
                 ]);
                 
                 Auth::login($newUser);

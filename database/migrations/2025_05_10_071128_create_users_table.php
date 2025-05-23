@@ -19,6 +19,7 @@ public function up()
         $table->string('email')->unique();
         $table->string('password');
         $table->timestamps();
+        $table->string('avatar', 1024)->nullable(); // Make sure this is long enough
     });
 }
 

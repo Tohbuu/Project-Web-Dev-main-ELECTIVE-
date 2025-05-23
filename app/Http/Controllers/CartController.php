@@ -135,7 +135,13 @@ class CartController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $cartItems = Cart::where('user_id', Auth::id())->get();
+        // Only get cart items with status 'pending' or where status is null (for backward compatibility)
+        $cartItems = Cart::where('user_id', Auth::id())
+                        ->where(function($query) {
+                            $query->where('status', 'pending')
+                                  ->orWhereNull('status');
+                        })
+                        ->get();
         
         // Update image paths and standardize names for all cart items
         foreach ($cartItems as $item) {
@@ -198,27 +204,51 @@ class CartController extends Controller
      */
     public function completeCheckout(Request $request)
     {
-        // Get all cart items for the current user
-        $cartItems = Cart::where('user_id', Auth::id())->get();
+        // Get only pending cart items for the current user
+        $cartItems = Cart::where('user_id', Auth::id())
+                        ->where(function($query) {
+                            $query->where('status', 'pending')
+                                  ->orWhereNull('status');
+                        })
+                        ->get();
         
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
         
-        // Here you would typically:
-        // 1. Create an order record in your orders table
-        // 2. Move cart items to order items
-        // 3. Process payment if applicable
+        // Calculate total
+        $total = $cartItems->sum(function($item) {
+            return $item->price * $item->quantity;
+        });
         
-        // For now, we'll just clear the cart
-        Cart::where('user_id', Auth::id())->delete();
+        // Generate a unique order number
+        $orderNumber = 'ORD-' . time() . '-' . Auth::id();
+        
+        // Update all cart items to completed status (moving them to order history)
+        foreach ($cartItems as $item) {
+            $item->status = 'completed';
+            $item->order_number = $orderNumber; // Add order number to group items
+            $item->save();
+        }
         
         // Get the order summary from session
         $orderSummary = session('order_summary');
         
         if (!$orderSummary) {
-            return redirect()->route('frontpage')->with('success', 'Order placed successfully!');
+            // If no order summary in session, create one
+            $orderSummary = [
+                'order_number' => $orderNumber,
+                'order_date' => now()->format('M d, Y h:i A'),
+                'items' => $cartItems,
+                'total' => $total
+            ];
         }
+        
+        // Store checkout information in session for confirmation message
+        session()->flash('checkout_complete', true);
+        session()->flash('order_items_count', $cartItems->count());
+        session()->flash('order_total', $total);
+        session()->flash('order_number', $orderNumber);
         
         // Clear the order summary from session
         session()->forget('order_summary');
@@ -301,7 +331,13 @@ class CartController extends Controller
     public function complete(Request $request)
     {
         $user = Auth::user();
-        $cartItems = Cart::where('user_id', Auth::id())->get();
+        // Get only pending cart items
+        $cartItems = Cart::where('user_id', Auth::id())
+                        ->where(function($query) {
+                            $query->where('status', 'pending')
+                                  ->orWhereNull('status');
+                        })
+                        ->get();
         
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');

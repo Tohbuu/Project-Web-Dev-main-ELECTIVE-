@@ -40,4 +40,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Note: Avatar handling is now done in the inline script in frontpage.blade.php
+    // This prevents conflicts between the two scripts
+    
+    // Clear browser cache for specific resources (avatar images)
+    function clearImageCache() {
+        if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+                cacheNames.forEach(cacheName => {
+                    if (cacheName.includes('image')) {
+                        caches.delete(cacheName)
+                            .then(() => console.log('Cache deleted:', cacheName))
+                            .catch(err => console.error('Error deleting cache:', err));
+                    }
+                });
+            });
+        }
+    }
+    
+    // Clear image cache when user logs in with Google
+    if (window.location.href.includes('auth/google/callback') || 
+        document.referrer.includes('auth/google')) {
+        clearImageCache();
+    }
 });
