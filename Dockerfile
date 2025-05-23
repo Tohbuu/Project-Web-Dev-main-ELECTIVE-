@@ -28,9 +28,6 @@ WORKDIR /var/www/html
 # Copy existing application directory contents
 COPY . /var/www/html
 
-# Create directory for Apache configuration
-RUN mkdir -p /var/www/html/docker
-
 # Copy Apache configuration
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
@@ -43,25 +40,16 @@ RUN composer install --optimize-autoloader --no-dev
 # Install Node.js dependencies and build assets
 RUN npm ci && npm run build
 
-# Create SQLite database directory
-RUN mkdir -p /var/www/html/database
-RUN touch /var/www/html/database/database.sqlite
-
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/database
-
-# Create .env file from example
-RUN cp .env.example .env
+    && chmod -R 755 /var/www/html/storage
 
 # Expose port 80
 EXPOSE 80
 
-# Change this line
-# CMD ["apache2-foreground"]
-
-# To this
+# Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Start Apache server with our entrypoint script
 CMD ["/usr/local/bin/docker-entrypoint.sh"]
