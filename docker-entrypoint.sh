@@ -110,8 +110,7 @@ echo "Testing PostgreSQL connection with PHP PDO..."
 cat > /tmp/db-test.php << EOF
 <?php
 \$host = '${DB_HOST}';
-\$port = ${DB_PORT};  // Note: Added quotes around the port value
-\$database = '${DB_DATABASE}';
+\$port = intval('${DB_PORT}');  // Convert to integer explicitly\$database = '${DB_DATABASE}';
 \$username = '${DB_USERNAME}';
 \$password = '${DB_PASSWORD}';
 
