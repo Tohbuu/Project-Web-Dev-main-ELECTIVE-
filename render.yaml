@@ -38,3 +38,63 @@ services:
       name: sqlite-data
       mountPath: /var/www/html/database
       sizeGB: 1
+  - type: web
+    name: pizza-app
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: APP_NAME
+        value: Laravel
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        value: base64:JHz8z/RktRjihYfF5Pe6w0nc1/EzU0Dx1FgTey5inB4=
+      - key: APP_URL
+        fromService:
+          name: pizza-app
+          type: web
+          property: host
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: pizza-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: pizza-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: pizza-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: pizza-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: pizza-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: MAIL_MAILER
+        value: log
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://pizza-app.onrender.com/auth/google/callback
+
+databases:
+  - name: pizza-db
+    plan: free
+    databaseName: pizza_db
+    user: pizza_user

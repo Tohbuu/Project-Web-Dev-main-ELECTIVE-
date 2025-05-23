@@ -5,16 +5,19 @@ set -o errexit
 # Install PHP dependencies
 composer install --no-dev --optimize-autoloader
 
-# Set up environment file
-cp .env.example .env
-php artisan key:generate
+# Generate application key
+php artisan key:generate --force
 
-# Set up database
+# Clear caches
+php artisan cache:clear
+php artisan config:clear
+
+# Run database migrations
 php artisan migrate --force
 
-# Build frontend assets
+# Build frontend assets with Vite
 npm ci
 npm run build
 
-# Clear and cache routes, config, and views
+# Optimize Laravel
 php artisan optimize
