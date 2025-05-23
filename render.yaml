@@ -29,11 +29,6 @@ services:
         value: sync
       - key: MAIL_MAILER
         value: log
-      - key: GOOGLE_CLIENT_ID
-        value: 
-      - key: GOOGLE_CLIENT_SECRET
-        value: 
-      - key: GOOGLE_REDIRECT_URI
         fromService:
           name: captaincheff
           type: web
