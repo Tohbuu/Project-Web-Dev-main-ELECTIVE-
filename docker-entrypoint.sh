@@ -107,67 +107,77 @@ fi
 
 # Test PostgreSQL connection with PHP PDO
 echo "Testing PostgreSQL connection with PHP PDO..."
-php -r "
+cat > /tmp/db-test.php << 'EOF'
+<?php
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$database = getenv('DB_DATABASE');
+$username = getenv('DB_USERNAME');
+$password = getenv('DB_PASSWORD');
+
 try {
     echo "Attempting to connect to PostgreSQL database...\n";
-    echo "Host: ${DB_HOST}\n";
-    echo "Port: ${DB_PORT}\n";
-    echo "Database: ${DB_DATABASE}\n";
-    echo "Username: ${DB_USERNAME}\n";
+    echo "Host: {$host}\n";
+    echo "Port: {$port}\n";
+    echo "Database: {$database}\n";
+    echo "Username: {$username}\n";
     echo "SSL Mode: require\n";
     
-    \$dsn = "pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE};user=${DB_USERNAME};password=${DB_PASSWORD};sslmode=require";
-    \$pdo = new PDO(\$dsn);
-    \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dsn = "pgsql:host={$host};port={$port};dbname={$database};user={$username};password={$password};sslmode=require";
+    $pdo = new PDO($dsn);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     echo "PDO connection successful!\n";
     
-    \$stmt = \$pdo->query('SELECT version()');
-    \$version = \$stmt->fetch();
-    echo "PostgreSQL version: " . \$version[0] . "\n";
+    $stmt = $pdo->query('SELECT version()');
+    $version = $stmt->fetch();
+    echo "PostgreSQL version: " . $version[0] . "\n";
     
     // Check if migrations table exists
-    \$stmt = \$pdo->query("SELECT to_regclass('public.migrations')");
-    \$result = \$stmt->fetch();
-    if (\$result[0]) {
+    $stmt = $pdo->query("SELECT to_regclass('public.migrations')");
+    $result = $stmt->fetch();
+    if ($result[0]) {
         echo "Migrations table exists.\n";
-        \$stmt = \$pdo->query("SELECT COUNT(*) FROM migrations");
-        \$count = \$stmt->fetch();
-        echo "Number of migrations: " . \$count[0] . "\n";
+        $stmt = $pdo->query("SELECT COUNT(*) FROM migrations");
+        $count = $stmt->fetch();
+        echo "Number of migrations: " . $count[0] . "\n";
         
         // List the last 5 migrations
         echo "Last 5 migrations:\n";
-        \$stmt = \$pdo->query("SELECT migration, batch FROM migrations ORDER BY batch DESC, migration DESC LIMIT 5");
-        while (\$row = \$stmt->fetch(PDO::FETCH_ASSOC)) {
-            echo "- " . \$row['migration'] . " (Batch: " . \$row['batch'] . ")\n";
+        $stmt = $pdo->query("SELECT migration, batch FROM migrations ORDER BY batch DESC, migration DESC LIMIT 5");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "- " . $row['migration'] . " (Batch: " . $row['batch'] . ")\n";
         }
     } else {
         echo "Migrations table does not exist. Will be created during migration.\n";
     }
     
     // Check database size
-    \$stmt = \$pdo->query("SELECT pg_size_pretty(pg_database_size(current_database())) as size");
-    \$size = \$stmt->fetch(PDO::FETCH_ASSOC);
-    echo "\nDatabase size: " . \$size['size'] . "\n";
+    $stmt = $pdo->query("SELECT pg_size_pretty(pg_database_size(current_database())) as size");
+    $size = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo "\nDatabase size: " . $size['size'] . "\n";
     
     // List tables
     echo "\nDatabase tables:\n";
-    \$stmt = \$pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
-    \$tables = \$stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
+    $tables = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    if (count(\$tables) > 0) {
-        foreach (\$tables as \$table) {
-            echo "- " . \$table['table_name'] . "\n";
+    if (count($tables) > 0) {
+        foreach ($tables as $table) {
+            echo "- " . $table['table_name'] . "\n";
         }
     } else {
         echo "No tables found in the database.\n";
     }
     
-    \$pdo = null;
-} catch(PDOException \$e) {
-    echo "PDO Error: " . \$e->getMessage() . "\n";
+    $pdo = null;
+} catch(PDOException $e) {
+    echo "PDO Error: " . $e->getMessage() . "\n";
 }
-"
+EOF
+
+# Execute the PHP script
+php /tmp/db-test.php
 
 # Check if the database is reachable with ping
 echo "Testing network connectivity to database host..."
