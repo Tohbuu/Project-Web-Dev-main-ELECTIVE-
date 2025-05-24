@@ -6,9 +6,27 @@ use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
+    /**
+     * Image directories to search for product images
+     */
+    private const IMAGE_DIRECTORIES = ['', 'images/', 'img/', 'assets/images/'];
+    
+    /**
+     * Map of pizza names to their possible image filenames
+     */
+    private const PIZZA_IMAGE_MAP = [
+        'pepporoni pizza' => ['pepporoni pizza.png', 'peperonipizza.jpg', 'pepperoni pizza.png'],
+        'hawaiian pizza' => ['hawaian pizza.png', 'hawaiian pizza.jpg', 'hawaiian pizza.png'],
+        'cheese pizza' => ['Cheese pizza.png', 'cheesepizza.jpg'],
+        'meat pizza' => ['meaty pizza.png', 'meatpizza.jpg'],
+        'overload cheese pizza' => ['overload cheese pizza.png', 'cheezypizza.jpg'],
+        'cheesy pizza' => ['overload cheese pizza.png', 'cheezypizza.jpg'],
+    ];
+
     /**
      * Normalize image path for storage
      * 
@@ -21,13 +39,8 @@ class CartController extends Controller
         $imagePath = basename($imagePath);
         
         // Check if the image exists in public directory
-        $possiblePaths = [
-            'images/' . $imagePath,
-            'img/' . $imagePath,
-            'assets/images/' . $imagePath
-        ];
-        
-        foreach ($possiblePaths as $path) {
+        foreach (self::IMAGE_DIRECTORIES as $dir) {
+            $path = $dir . $imagePath;
             if (file_exists(public_path($path))) {
                 return $path;
             }
@@ -41,30 +54,17 @@ class CartController extends Controller
      * Get the correct image path for a pizza item
      * 
      * @param string $itemName
-     * @param string $imagePath
+     * @param string|null $imagePath
      * @return string
      */
     private function getPizzaImagePath($itemName, $imagePath = null)
     {
-        // Map of pizza names to their image filenames
-        $pizzaImageMap = [
-            'pepporoni pizza' => ['pepporoni pizza.png', 'peperonipizza.jpg', 'pepperoni pizza.png'],
-            'hawaiian pizza' => ['hawaian pizza.png', 'hawaiian pizza.jpg', 'hawaiian pizza.png'],
-            'cheese pizza' => ['Cheese pizza.png', 'cheesepizza.jpg'],
-            'meat pizza' => ['meaty pizza.png', 'meatpizza.jpg'],
-            'overload cheese pizza' => ['overload cheese pizza.png', 'cheezypizza.jpg'],
-            'cheesy pizza' => ['overload cheese pizza.png', 'cheezypizza.jpg'],
-        ];
-        
         $itemName = strtolower($itemName);
         
-        // Check all possible directories for images
-        $possibleDirectories = ['', 'images/', 'img/', 'assets/images/'];
-        
         // First try the specific mapping
-        if (isset($pizzaImageMap[$itemName])) {
-            foreach ($pizzaImageMap[$itemName] as $possibleImage) {
-                foreach ($possibleDirectories as $dir) {
+        if (isset(self::PIZZA_IMAGE_MAP[$itemName])) {
+            foreach (self::PIZZA_IMAGE_MAP[$itemName] as $possibleImage) {
+                foreach (self::IMAGE_DIRECTORIES as $dir) {
                     if (file_exists(public_path($dir . $possibleImage))) {
                         return $dir . $possibleImage;
                     }
@@ -74,10 +74,10 @@ class CartController extends Controller
         
         // Then try the provided image path
         if ($imagePath) {
-            // Clean up the image path (remove any URL or asset path prefixes)
+            // Clean up the image path
             $cleanImagePath = basename($imagePath);
             
-            foreach ($possibleDirectories as $dir) {
+            foreach (self::IMAGE_DIRECTORIES as $dir) {
                 if (file_exists(public_path($dir . $cleanImagePath))) {
                     return $dir . $cleanImagePath;
                 }
@@ -89,11 +89,11 @@ class CartController extends Controller
             }
         }
         
-        // Debug information - log what we're looking for
-        \Log::info("Pizza image not found for: {$itemName}, tried image: {$imagePath}");
+        // Log what we're looking for
+        Log::info("Pizza image not found for: {$itemName}, tried image: {$imagePath}");
         
         // Default fallback - check if it exists
-        foreach ($possibleDirectories as $dir) {
+        foreach (self::IMAGE_DIRECTORIES as $dir) {
             if (file_exists(public_path($dir . 'pizza-placeholder.png'))) {
                 return $dir . 'pizza-placeholder.png';
             }
@@ -103,6 +103,50 @@ class CartController extends Controller
         return 'pizza-placeholder.png';
     }
 
+    /**
+     * Get pending cart items for the current user
+     * 
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getPendingCartItems()
+    {
+        return Cart::where('user_id', Auth::id())
+            ->where(function($query) {
+                $query->where('status', 'pending')
+                      ->orWhereNull('status');
+            })
+            ->get();
+    }
+
+    /**
+     * Calculate total price of cart items
+     * 
+     * @param \Illuminate\Database\Eloquent\Collection $cartItems
+     * @return float
+     */
+    private function calculateCartTotal($cartItems)
+    {
+        return $cartItems->sum(function($item) {
+            return $item->price * $item->quantity;
+        });
+    }
+
+    /**
+     * Generate a unique order number
+     * 
+     * @return string
+     */
+    private function generateOrderNumber()
+    {
+        return 'ORD-' . time() . '-' . Auth::id();
+    }
+
+    /**
+     * Add item to cart
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -132,16 +176,15 @@ class CartController extends Controller
         return redirect()->route('cart.index')->with('success', 'Item added to cart!');
     }
 
+    /**
+     * Display cart contents
+     * 
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $user = Auth::user();
-        // Only get cart items with status 'pending' or where status is null (for backward compatibility)
-        $cartItems = Cart::where('user_id', Auth::id())
-                        ->where(function($query) {
-                            $query->where('status', 'pending')
-                                  ->orWhereNull('status');
-                        })
-                        ->get();
+        $cartItems = $this->getPendingCartItems();
         
         // Update image paths and standardize names for all cart items
         foreach ($cartItems as $item) {
@@ -159,21 +202,21 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * Show checkout page
+     * 
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function checkout(Request $request)
     {
-        // Get all cart items for the current user
-        $cartItems = Cart::where('user_id', Auth::id())->get();
+        $cartItems = $this->getPendingCartItems();
         
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
         
-        // Calculate the total
-        $total = $cartItems->sum(function($item) {
-            return $item->price * $item->quantity;
-        });
-        
-        // Generate a unique order number
+        $total = $this->calculateCartTotal($cartItems);
         $orderNumber = 'ORD-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
         
         // Store order information in session for the receipt page
@@ -186,10 +229,6 @@ class CartController extends Controller
             ]
         ]);
         
-        // Move cart items to order history (you might want to create a proper Order model for this)
-        // For now, we'll just keep the cart items as they are
-        
-        // Return the checkout summary view
         return view('checkout-summary', [
             'orderNumber' => $orderNumber,
             'orderDate' => now()->format('M d, Y h:i A'),
@@ -201,48 +240,35 @@ class CartController extends Controller
     
     /**
      * Complete the checkout process and clear the cart
+     * 
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function completeCheckout(Request $request)
     {
-        // Get only pending cart items for the current user
-        $cartItems = Cart::where('user_id', Auth::id())
-                        ->where(function($query) {
-                            $query->where('status', 'pending')
-                                  ->orWhereNull('status');
-                        })
-                        ->get();
+        $cartItems = $this->getPendingCartItems();
         
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
         
-        // Calculate total
-        $total = $cartItems->sum(function($item) {
-            return $item->price * $item->quantity;
-        });
+        $total = $this->calculateCartTotal($cartItems);
+        $orderNumber = $this->generateOrderNumber();
         
-        // Generate a unique order number
-        $orderNumber = 'ORD-' . time() . '-' . Auth::id();
-        
-        // Update all cart items to completed status (moving them to order history)
+        // Update all cart items to completed status
         foreach ($cartItems as $item) {
             $item->status = 'completed';
-            $item->order_number = $orderNumber; // Add order number to group items
+            $item->order_number = $orderNumber;
             $item->save();
         }
         
-        // Get the order summary from session
-        $orderSummary = session('order_summary');
-        
-        if (!$orderSummary) {
-            // If no order summary in session, create one
-            $orderSummary = [
-                'order_number' => $orderNumber,
-                'order_date' => now()->format('M d, Y h:i A'),
-                'items' => $cartItems,
-                'total' => $total
-            ];
-        }
+        // Get the order summary from session or create one
+        $orderSummary = session('order_summary') ?? [
+            'order_number' => $orderNumber,
+            'order_date' => now()->format('M d, Y h:i A'),
+            'items' => $cartItems,
+            'total' => $total
+        ];
         
         // Store checkout information in session for confirmation message
         session()->flash('checkout_complete', true);
@@ -253,7 +279,6 @@ class CartController extends Controller
         // Clear the order summary from session
         session()->forget('order_summary');
         
-        // Return the receipt view
         return view('order-receipt', [
             'orderNumber' => $orderSummary['order_number'],
             'orderDate' => $orderSummary['order_date'],
@@ -263,6 +288,12 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * Remove item from cart
+     * 
+     * @param Cart $cart
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Cart $cart)
     {
         // Make sure the cart item belongs to the authenticated user
@@ -328,33 +359,27 @@ class CartController extends Controller
         }
     }
 
+    /**
+     * Complete order and redirect to dashboard
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function complete(Request $request)
     {
-        $user = Auth::user();
-        // Get only pending cart items
-        $cartItems = Cart::where('user_id', Auth::id())
-                        ->where(function($query) {
-                            $query->where('status', 'pending')
-                                  ->orWhereNull('status');
-                        })
-                        ->get();
+        $cartItems = $this->getPendingCartItems();
         
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
         
-        // Calculate total
-        $total = $cartItems->sum(function($item) {
-            return $item->price * $item->quantity;
-        });
-        
-        // Create a new order record to track the entire order
-        $orderNumber = 'ORD-' . time() . '-' . Auth::id();
+        $total = $this->calculateCartTotal($cartItems);
+        $orderNumber = $this->generateOrderNumber();
         
         // Update all cart items to completed status
         foreach ($cartItems as $item) {
             $item->status = 'completed';
-            $item->order_number = $orderNumber; // Add order number to group items
+            $item->order_number = $orderNumber;
             $item->save();
         }
         

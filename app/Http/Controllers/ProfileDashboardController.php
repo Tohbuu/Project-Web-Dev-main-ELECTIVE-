@@ -14,7 +14,14 @@ class ProfileDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $orders = Cart::where('user_id', Auth::id())
+        
+        // Explicitly check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
+        // Get only the current user's orders
+        $orders = Cart::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
             
